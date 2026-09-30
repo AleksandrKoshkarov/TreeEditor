@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test src/domain/cache.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

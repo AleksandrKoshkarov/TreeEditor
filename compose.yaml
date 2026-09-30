@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:18.4-alpine
+    environment:
+      POSTGRES_DB: tree_editor
+      POSTGRES_USER: tree_editor
+      POSTGRES_PASSWORD: tree_editor
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tree_editor -d tree_editor"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: TreeEditor.Api/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Tree: Host=db;Port=5432;Database=tree_editor;Username=tree_editor;Password=tree_editor
+      SeedSqlPath: /app/db/02-seed.sql
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./tree-editor-web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
